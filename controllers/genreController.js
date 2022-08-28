@@ -23,3 +23,11 @@ exports.genre_delete_get = (req, res) => {
 exports.genre_delete_post = (req, res) => {
     res.send("Not implemented: Genre delete post");
 };
+
+exports.genre_update_get = (req, res) => {
+    res.send("Not implemented: Genre update get");
+};
+
+exports.genre_update_post = (req, res) => {
+    res.send("Not implemented: Genre update post");
+};
