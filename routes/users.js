@@ -10,4 +10,8 @@ router.get("/cool", (req, res) => {
   res.send("You're so cool!");
 });
 
+router.get("/users", (req, res) => {
+  res.render("layout");
+});
+
 module.exports = router;
