@@ -7,13 +7,13 @@ block content
         each bookInstance in booksInstances 
             li
                 a(href=bookInstance.url) #{bookInstance.book.title} : #{bookInstance.imprint} - 
-                if bookInstance.status=="Available"
+                if bookInstance.status == "Available"
                     span.text-success #{bookInstance.status} 
-                else if bookInstance.status=="Maintenance" 
+                else if bookInstance.status == "Maintenance" 
                     span.text-danger #{bookInstance.status} 
                 else 
                     span.text-warning #{bookInstance.status} 
-                if bookInstance.status!="Available"
-                    span (Due: #{bookInstance.due_back})
+                if bookInstance.status != "Available"
+                    span (Due: #{bookInstance.dueBackFormatted})
         else 
             li There are no copies in this library.

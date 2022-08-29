@@ -1,7 +1,13 @@
+const { nextTick } = require("async");
 const Author = require("../models/author");
 
-exports.author_list = (req, res) => {
-    res.send("Not implemented: Author list");
+exports.author_list = (req, res, next) => {
+    Author
+        .find()
+        .exec(function(err, authors) {
+            if(err) return next(err);
+            return res.render("authorsList", { title: "Authors", authors});
+        });
 };
 
 exports.author_detail = (req, res) => {
