@@ -12,7 +12,7 @@ AuthorSchema
     .get(function() {
         let fullName = "";
         if(this.first_name && this.family_name) {
-            fullName: `${this.family_name}, ${this.first_name}`
+            fullName = `${this.family_name}, ${this.first_name}`
         }
         return fullName;
     });
