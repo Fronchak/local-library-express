@@ -1,4 +1,7 @@
+const async = require("async");
+const mongoose = require("mongoose");
 const Genre = require("../models/genre");
+const Book = require("../models/book");
 
 exports.genre_list = (req, res, next) => {
     Genre.find()
@@ -9,8 +12,29 @@ exports.genre_list = (req, res, next) => {
         })
 };
 
-exports.genre_detail = (req, res) => {
-    res.send("Not implemented: Genre detail: " + req.params.id);
+exports.genre_detail = (req, res, next) => {
+    const id = mongoose.Types.ObjectId(req.params.id);
+    async.parallel({
+        genre(callback) {
+            Genre.findById(id)
+                .exec(callback);
+        },
+        books(callback) {
+            Book.find({ genre: id })
+                .sort({ title: 1 })
+                .exec(callback)
+        }
+    },
+    (err, results) => {
+        if(err) return next(err);
+        if(!results.genre) {
+            const err = new Error("Genre not found");
+            err.status(404);
+            return next(err);
+        }
+            
+        return res.render("genreDetail", { title: "Genre Detail", genre: results.genre, books: results.books });
+    })
 };
 
 exports.genre_create_get = (req, res) => {
