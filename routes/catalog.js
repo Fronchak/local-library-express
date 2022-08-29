@@ -47,6 +47,6 @@ router.post("/bookInstance/:id/delete", bookInstanceController.bookInstance_dele
 router.get("/bookInstance/:id/update", bookInstanceController.bookInstance_update_get);
 router.post("/bookInstance/:id/update", bookInstanceController.bookInstance_update_post);
 router.get("/bookInstance/:id", bookInstanceController.bookInstance_detail);
-router.get("/bookInstances", bookInstanceController.bookInstance_list);
+router.get("/bookinstances", bookInstanceController.bookInstance_list);
 
 module.exports = router;

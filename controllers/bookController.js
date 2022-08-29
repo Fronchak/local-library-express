@@ -37,7 +37,6 @@ exports.book_list = (req, res, next) => {
         .sort({title: 1})
         .populate("author")
         .exec(function(err, books) {
-            console.log(books);
             if (err) return next(err);
             res.render("booksList", { title: "Book List", books });
         });

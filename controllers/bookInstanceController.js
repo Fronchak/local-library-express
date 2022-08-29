@@ -1,7 +1,14 @@
+const { nextTick } = require("async");
 const BookInstance = require("../models/bookInstance");
 
-exports.bookInstance_list = (req, res) => {
-    res.send("Not implemented: BookInstance list");
+exports.bookInstance_list = (req, res, next) => {
+    BookInstance
+        .find()
+        .populate("book")
+        .exec(function(err, booksInstances) {
+            if(err) return next(err);
+            return res.render("booksInstancesList", { title: "Books Copies", booksInstances });
+        });
 };
 
 exports.bookInstance_detail = (req, res) => {
