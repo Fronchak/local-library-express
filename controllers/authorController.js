@@ -1,5 +1,7 @@
-const { nextTick } = require("async");
+const async = require("async");
+const mongoose = require("mongoose");
 const Author = require("../models/author");
+const Book = require("../models/book");
 
 exports.author_list = (req, res, next) => {
     Author
@@ -11,8 +13,32 @@ exports.author_list = (req, res, next) => {
         });
 };
 
-exports.author_detail = (req, res) => {
-    res.send(`Not implemented: Author detail: ${req.params.id}`);
+exports.author_detail = (req, res, next) => {
+    const id = mongoose.Types.ObjectId(req.params.id);
+    async.parallel({
+        author(callback) {
+            Author.findById(id).exec(callback);
+        },
+        books(callback) {
+            Book
+                .find({ author: id })
+                .sort({ title: 1 })
+                .exec(callback);
+        }
+    },
+    (err, results) => {
+        if(err) return next(err);
+        if(!results.author) {
+            const err = new Error("Author not found");
+            err.status = 404;
+            return next(err);
+        }
+        return res.render("authorDetail", { 
+            title: results.author.name, 
+            author: results.author, 
+            books: results.books 
+        });
+    });
 };
 
 exports.author_create_get = (req, res) => {

@@ -1,4 +1,4 @@
-const { nextTick } = require("async");
+const mongoose = require("mongoose");
 const BookInstance = require("../models/bookInstance");
 
 exports.bookInstance_list = (req, res, next) => {
@@ -11,8 +11,20 @@ exports.bookInstance_list = (req, res, next) => {
         });
 };
 
-exports.bookInstance_detail = (req, res) => {
-    res.send("Not implemented: BookInstance detail: " + req.params.id);
+exports.bookInstance_detail = (req, res, next) => {
+    const id = mongoose.Types.ObjectId(req.params.id);
+    BookInstance.findById(id)
+        .populate("book")
+        .exec((err, copie) => {
+            if (err) return next(err);
+            if (!copie) {
+                const err = new Error("Cound find book's copie");
+                err.status = 404;
+                return next(err);
+            }
+            return res.render("bookInstanceDetail", {title: `Copy: ${copie.book.title}`, copie });
+        });   
+            
 };
 
 exports.bookInstance_create_get = (req, res) => {

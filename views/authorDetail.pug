@@ -1,0 +1,23 @@
+extends layout 
+
+block content 
+
+    h1 Author: #{author.name}
+
+    p #[strong First Name: ] #{author.first_name} 
+    p #[strong Family Name: ] #{author.family_name} 
+    p #[strong Birth Date: ] #{author.birthDateFormatted}
+    p #[strong Death Date: ] #{author.deathDateFormatted}
+
+    div(style="margin-left:20px;margin-top:20px")
+
+        h4 Books
+
+        dl 
+            each book in books 
+                dt 
+                    a(href=book.url) #{book.title}
+                dd #{book.summary}
+
+            else 
+                p This author has no books
