@@ -27,13 +27,15 @@ AuthorSchema
 AuthorSchema
     .virtual("birthDateFormatted")
     .get(function() {
-        return DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATETIME_MED);
+        return (this.date_of_birth) ? 
+            DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATETIME_MED) : "";
     });
 
 AuthorSchema
     .virtual("deathDateFormatted")
     .get(function() {
-        return DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATETIME_MED);
+        return (this.date_of_death) ? 
+            DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATETIME_MED) : "";
     });
 
 module.exports = mongoose.model("Author", AuthorSchema);
