@@ -1,5 +1,6 @@
 const async = require("async");
 const mongoose = require("mongoose");
+const { body, validationResult } = require("express-validator");
 const Author = require("../models/author");
 const Book = require("../models/book");
 
@@ -42,12 +43,51 @@ exports.author_detail = (req, res, next) => {
 };
 
 exports.author_create_get = (req, res) => {
-    res.send("Not implemented: Author create get");
+    res.render("authorForm", { title: "Create Author" });
 };
 
-exports.author_create_post = (req, res) => {
-    res.send("Not implemented: Author create post");
-};
+exports.author_create_post = [
+    body("first_name")
+        .trim()
+        .isLength({ min: 1 })
+        .withMessage("First name must be specified.")
+        .isAlpha()
+        .withMessage("First name has non-alphanumeric characters."),
+    body("family_name")
+        .trim()
+        .isLength({ min: 1 })
+        .withMessage("Family name must be specified.")
+        .isAlpha()
+        .withMessage("Family name has non-alphanumeric chracters."),
+    body("date_of_birth", "Invalid date of birth")
+        .optional({ checkFalsy: true })
+        .isISO8601()
+        .toDate(),
+    body("date_of_death", "Invalid date of daeth")
+        .optional({ checkFalsy: true })
+        .isISO8601()
+        .toDate(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.render("authorForm", { 
+                title: "Create Author", 
+                author: req.body,
+                errors: errors.array() 
+            });
+        }
+        const author = new Author({
+            first_name: req.body.first_name,
+            family_name: req.body.family_name,
+            date_of_birth: req.body.date_of_birth,
+            date_of_death: req.body.date_of_death
+        });
+        author.save((err) => {
+            if (err) return next(err);
+            return res.redirect(author.url);
+        });
+    }
+];
 
 exports.author_delete_get = (req, res) => {
     res.send("Not implemented: Author delete get");
