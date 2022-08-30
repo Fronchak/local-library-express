@@ -1,5 +1,6 @@
 const async = require("async");
 const mongoose = require("mongoose");
+const { body, validationResult } = require("express-validator");
 const Genre = require("../models/genre");
 const Book = require("../models/book");
 
@@ -38,12 +39,39 @@ exports.genre_detail = (req, res, next) => {
 };
 
 exports.genre_create_get = (req, res) => {
-    res.send("Not implemented: Genre create get");
+    res.render("genreForm", { title: "Create Genre" });
 };
 
-exports.genre_create_post = (req, res) => {
-    res.send("Not implemented: Genre create post");
-};
+exports.genre_create_post = [
+    body("name", "Genre name required")
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        const genre = new Genre({ name: req.body.name });
+        if (!errors.isEmpty()) {
+            return res.render("genreForm", {
+                title: "Create Genre",
+                genre,
+                errors: errors.array()
+            });
+        }
+        else {
+            Genre.findOne({ name: req.body.name })
+                .exec((err, genreFounded) => {
+                    if(err) return next(err);
+                    if(genreFounded) return res.redirect(genreFounded.url);
+                    else {
+                        genre.save((err) => {
+                            if(err) return next(err);
+                            return res.redirect(genre.url);
+                        });
+                    }
+                });
+        }
+    }
+];
 
 exports.genre_delete_get = (req, res) => {
     res.send("Not implemented: Genre delete get");
