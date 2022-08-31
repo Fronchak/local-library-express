@@ -74,11 +74,40 @@ exports.genre_create_post = [
 ];
 
 exports.genre_delete_get = (req, res) => {
-    res.send("Not implemented: Genre delete get");
+    const id = mongoose.Types.ObjectId(req.params.id);
+    async.parallel({
+        genre(callback) {
+            Genre.findById(id)
+                .exec(callback);
+        },
+        genreBooks(callback) {
+            Book.find({ genre: id })
+                .exec(callback);
+        }
+    },
+    (err, results) => {
+        if (err) return next(err);
+        if (!results.genre) {
+            return res.redirect("/catalog/genres");
+        }
+        res.render("genreDelete", {
+            title: "Delete Genre",
+            genre: results.genre,
+            genreBooks: results.genreBooks
+        });
+    });
 };
 
 exports.genre_delete_post = (req, res) => {
-    res.send("Not implemented: Genre delete post");
+    const id = req.body.genreid;
+    Genre.findById(id).exec((err, genre) => {
+        if (err) return next(err);
+        if (!genre) return res.redirect("/catalog/gentes");
+        Genre.findByIdAndDelete(id, (err) => {
+            if (err) return next(err);
+            return res.redirect("/catalog/genres");
+        });
+    });
 };
 
 exports.genre_update_get = (req, res) => {
