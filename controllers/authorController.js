@@ -76,12 +76,7 @@ exports.author_create_post = [
                 errors: errors.array() 
             });
         }
-        const author = new Author({
-            first_name: req.body.first_name,
-            family_name: req.body.family_name,
-            date_of_birth: req.body.date_of_birth,
-            date_of_death: req.body.date_of_death
-        });
+        const author = new Author(req.body);
         author.save((err) => {
             if (err) return next(err);
             return res.redirect(author.url);

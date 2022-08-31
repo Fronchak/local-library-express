@@ -11,7 +11,7 @@ router.get("/", bookController.index);
 
 // Book
 router.get("/book/create", bookController.book_create_get);
-router.post("/book/crete", bookController.book_create_post);
+router.post("/book/create", bookController.book_create_post);
 router.get("/book/:id/delete", bookController.book_delete_get);
 router.post("/book/:id/delete", bookController.book_delete_post);
 router.get("/book/:id/update", bookController.book_update_get);
