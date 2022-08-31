@@ -12,9 +12,9 @@ block content
         if copie.status == "Available"
             span.text-success #{copie.status} 
         else if copie.status == "Maintenance" 
-            span.text-danger = #{copie.status} 
+            span.text-danger #{copie.status} 
         else 
-            span.text-warning = #{copie.status} 
+            span.text-warning #{copie.status} 
 
         if copie.status != "Available" 
             p #[strong Due back: ] #{copie.dueBackFormatted}

@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
+const { body, validationResult } = require("express-validator");
 const BookInstance = require("../models/bookInstance");
+const Book = require("../models/book");
 
 exports.bookInstance_list = (req, res, next) => {
     BookInstance
@@ -28,12 +30,53 @@ exports.bookInstance_detail = (req, res, next) => {
 };
 
 exports.bookInstance_create_get = (req, res) => {
-    res.send("Not implemented: BookInstance create get");
+    Book.find({}, "title").exec((err, books) => {
+        if (err) return next(err);
+        res.render("bookInstanceForm", {
+            title: "Create BookInstance",
+            books
+        });
+    });
 };
 
-exports.bookInstance_create_post = (req, res) => {
-    res.send("Not implemented: BookInstance create post");
-};
+exports.bookInstance_create_post = [
+    body("book", "Book must be specified.")
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    body("imprint", "Imprint must be specified.")
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    body("status")
+        .escape(),
+    body("due_back", "Invalid date")
+        .optional({ checkFalsy: true })
+        .isISO8601()
+        .toDate(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        const bookInstance = new BookInstance(req.body);
+        if (!errors.isEmpty()) {
+            Book.find({}, "title")
+                .exec((err, books) => {
+                    if (err) return res.next(err);
+                    res.render("bookInstanceForm", {
+                        title: "Create BookInstance",
+                        books,
+                        selectedBook: bookInstance.book._id,
+                        errors: errors.array(),
+                        bookInstance
+                    });
+                });
+            return;
+        }
+        bookInstance.save((err) => {
+            if (err) return next(err);
+            res.redirect(bookInstance.url);
+        });
+    }
+];
 
 exports.bookInstance_delete_get = (req, res) => {
     res.send("Not implemented: BookInstance delete get");

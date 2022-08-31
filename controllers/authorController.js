@@ -85,11 +85,55 @@ exports.author_create_post = [
 ];
 
 exports.author_delete_get = (req, res) => {
-    res.send("Not implemented: Author delete get");
+    const id = mongoose.Types.ObjectId(req.params.id);
+    async.parallel({
+        author(callback) {
+            Author.findById(id)
+                .exec(callback);
+        },
+        authorBooks(callback) {
+            Book.find({ author: id })
+                .exec(callback);
+        }
+    },
+    (err, results) => {
+        if (err) return next(err);
+        if (!results.author) return res.redirect("/catalog/authors");
+        return res.render("authorDelete", {
+            title: "Delete Author",
+            author: results.author,
+            authorBooks: results.authorBooks
+        });
+    });
 };
 
 exports.author_delete_post = (req, res) => {
-    res.send("Not implemented: Author delete post");
+    const id = mongoose.Types.ObjectId(req.body.authorid);
+    async.parallel({
+        author(callback) {
+            Author.findById(id)
+                .exec(callback);
+        },
+        authorBooks(callback) {
+            Book.find({ author: id })
+                .exec(callback);
+        }
+    },
+    (err, results) => {
+        if (err) return next(err);
+        if (results.authorBooks.length > 0) {
+            res.render("authorDelete", {
+                title: "Delete Author",
+                author: results.author,
+                authorBooks: results.authorBooks
+            });
+            return;
+        }
+        Author.findByIdAndDelete(id, (err) => {
+            if (err) return next(err);
+            res.redirect("/catalog/authors");
+        });
+    });
 };
 
 exports.author_update_get = (req, res) => {
