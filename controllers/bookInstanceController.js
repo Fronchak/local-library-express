@@ -78,12 +78,31 @@ exports.bookInstance_create_post = [
     }
 ];
 
-exports.bookInstance_delete_get = (req, res) => {
-    res.send("Not implemented: BookInstance delete get");
+exports.bookInstance_delete_get = (req, res, next) => {
+    const id = mongoose.Types.ObjectId(req.params.id);
+    BookInstance.findById(id)
+        .populate("book")
+        .exec((err, bookInstance) => {
+            if (err) return next(err);
+            if (!bookInstance) return res.redirect("/catalog/bookinstances");
+            return res.render("bookInstanceDelete", {
+                title: "Delete Book Instance",
+                bookInstance
+            });
+        });
 };
 
 exports.bookInstance_delete_post = (req, res) => {
-    res.send("Not implemented: BookInstance delete post");
+    const id = req.body.bookinstanceid;
+    BookInstance.findById(id) 
+        .exec((err, bookInstance) => {
+            if (err) return next(err);
+            if (!bookInstance) return res.redirect("/catalog/bookinstances");
+            BookInstance.findByIdAndDelete(id, (err) => {
+                if (err) return next(err);
+                return res.redirect("/catalog/bookinstances");
+            });
+        });
 };
 
 exports.bookInstance_update_get = (req, res) => {
