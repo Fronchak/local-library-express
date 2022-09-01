@@ -1,6 +1,6 @@
 const async = require("async");
 const mongoose = require("mongoose");
-const { body, validationResult } = require("express-validator"); 
+const { body, validationResult } = require("express-validator");
 const Book = require("../models/book");
 const Author = require("../models/author");
 const Genre = require("../models/genre");
@@ -26,7 +26,7 @@ exports.index = (req, res) => {
     },
     (err, results) => {
         console.log(err);
-        res.render("index", { 
+        res.render("index", {
             title: "Local Library Home",
             error: err,
             data: results
@@ -76,7 +76,7 @@ exports.book_create_get = (req, res, next) => {
         genres(callback) {
             Genre.find(callback);
         }
-    }, 
+    },
     (err, results) => {
         if (err) return next(err);
         res.render("bookForm", {
@@ -150,12 +150,63 @@ exports.book_create_post = [
     }
 ];
 
-exports.book_delete_get = (req, res) => {
-    res.send("Not implemented: Book delete get");
+exports.book_delete_get = (req, res, next) => {
+  const id = mongoose.Types.ObjectId(req.params.id);
+  async.parallel({
+    book(callback) {
+      Book.findById(id)
+        .populate("author")
+        .populate("genre")
+        .exec(callback);
+    },
+    bookInstances(callback) {
+      BookInstance.find({ book: id })
+        .populate("book")
+        .exec(callback);
+    },
+  },
+  (err, results) => {
+    if (err) return next(err);
+    if (!results.book) return res.redirect("/catalog/books");
+    return res.render("bookDelete", {
+      title: "Delete Book",
+      book: results.book,
+      bookInstances: results.bookInstances,
+    });
+  });
 };
 
 exports.book_delete_post = (req, res) => {
-    res.send("Not implementd: Book delete post");
+    const id = req.body.bookid;
+    async.parallel({
+      book(callback) {
+        Book.findById(id)
+          .populate('author')
+          .populate('genre')
+          .exec(callback);
+      },
+      bookInstances(callback) {
+        BookInstance.find({ book: id })
+          .populate('book')
+          .exec(callback)
+      },
+    },
+    (err, results) => {
+      if (err) return next(err);
+      if (!results.book) return res.redirect("/catalog/books");
+      if (results.bookInstances.length > 0) {
+        res.render("bookDelete", {
+          title: "Delete Book",
+          book: results.book,
+          bookInstances: results.bookInstances,
+        })
+        return;
+      }
+      Book.findByIdAndDelete(id, (err) => {
+        if (err) return next(err);
+        return res.redirect("/catalog/books");
+      });
+    });
 };
 
 exports.book_update_get = (req, res) => {
