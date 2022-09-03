@@ -68,6 +68,7 @@ exports.author_create_post = [
         .isISO8601()
         .toDate(),
     (req, res, next) => {
+        console.log(req.body.date_of_birth);
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.render("authorForm", { 

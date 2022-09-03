@@ -111,9 +111,59 @@ exports.genre_delete_post = (req, res) => {
 };
 
 exports.genre_update_get = (req, res) => {
-    res.send("Not implemented: Genre update get");
+    const id = mongoose.Types.ObjectId(req.params.id);
+    Genre.findById(id)
+      .exec((err, genre) => {
+        if (err) return next(err);
+        if (!genre) {
+          const err = new Error("Genre not found");
+          err.status = 404;
+          return next(err);
+        }
+        res.render('genreForm', {
+          title: 'Update Genre',
+          genre,
+        });
+        return;
+      })
 };
 
-exports.genre_update_post = (req, res) => {
-    res.send("Not implemented: Genre update post");
-};
+exports.genre_update_post = [
+  body('name', `Genre's name must be specified.`)
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  (req, res, next) => {
+    const id = mongoose.Types.ObjectId(req.params.id);
+    const errors = validationResult(req);
+    const genre = new Genre({
+      name: req.body.name,
+      _id: id,
+    });
+    if (!errors.isEmpty()) {
+      res.render('genreForm', {
+        title: 'Update Genre',
+        genre,
+        errors: errors.array(),
+      });
+      return;
+    }
+    Genre.findOne({ name: req.body.name })
+      .exec((err, genreFounded) => {
+        if (err) return next(err);
+        if (genreFounded) {
+          const errors = [{ msg: 'Genre already exists.' }]
+          res.render('genreForm', {
+            title: 'Update Genre',
+            genre,
+            errors,
+          });
+          return;
+        }
+        Genre.findByIdAndUpdate(id, genre, {}, (err, updatedGenre) => {
+          if (err) return next(err);
+          return res.redirect(updatedGenre.url);
+        });
+      });
+  }
+];

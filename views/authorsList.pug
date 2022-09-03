@@ -8,8 +8,7 @@ block content
 
             li 
                 a(href=author.url) #{author.name} 
-                |  - Birth Date: #{author.birthDateFormatted} 
-                |  - Death Date: #{author.deathDateFormatted}   
+                |  - #{author.lifeSpan}  
 
         else 
             li There is no authors.

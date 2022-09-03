@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
+const async = require('async');
+const { DateTime } = require("luxon");
 const { body, validationResult } = require("express-validator");
 const BookInstance = require("../models/bookInstance");
 const Book = require("../models/book");
+const getDatePlusTimeZoneOffSet = require('../util/getDatePlusTimeZoneOffSet');
 
 exports.bookInstance_list = (req, res, next) => {
     BookInstance
@@ -56,7 +59,13 @@ exports.bookInstance_create_post = [
         .toDate(),
     (req, res, next) => {
         const errors = validationResult(req);
-        const bookInstance = new BookInstance(req.body);
+        const due_back = getDatePlusTimeZoneOffSet(req.body.due_back);
+        const bookInstance = new BookInstance({
+          book: req.body.book,
+          imprint: req.body.imprint,
+          due_back,
+          status: req.body.status
+        });
         if (!errors.isEmpty()) {
             Book.find({}, "title")
                 .exec((err, books) => {
@@ -106,7 +115,31 @@ exports.bookInstance_delete_post = (req, res) => {
 };
 
 exports.bookInstance_update_get = (req, res) => {
-    res.send("Not implemented: BookInstance update get");
+    const id = mongoose.Types.ObjectId(req.params.id);
+    async.parallel({
+      books(callback) {
+        Book.find()
+          .exec(callback);
+      },
+      bookInstance(callback) {
+        BookInstance.findById(id)
+          .exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) return next(err);
+      if (!results.bookInstance) {
+        const err = new Error(`Book's copie not found.`);
+        err.status = 404;
+        return next(err);
+      }
+      res.render('bookInstanceForm', {
+        title: 'Update Copie',
+        bookInstance: results.bookInstance,
+        books: results.books,
+      });
+      return;
+    });
 };
 
 exports.bookInstance_update_post = (req, res) => {
