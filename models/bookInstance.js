@@ -24,7 +24,7 @@ BookInstanceSchema
     });
 
 BookInstanceSchema
-    .virtual('dateTest')
+    .virtual('dueBackToISODate')
     .get(function() {
       return DateTime.fromJSDate(this.due_back).toISODate();
     });

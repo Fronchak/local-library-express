@@ -5,6 +5,7 @@ const { body, validationResult } = require("express-validator");
 const BookInstance = require("../models/bookInstance");
 const Book = require("../models/book");
 const getDatePlusTimeZoneOffSet = require('../util/getDatePlusTimeZoneOffSet');
+const bookInstance = require("../models/bookInstance");
 
 exports.bookInstance_list = (req, res, next) => {
     BookInstance
@@ -33,7 +34,8 @@ exports.bookInstance_detail = (req, res, next) => {
 };
 
 exports.bookInstance_create_get = (req, res) => {
-    Book.find({}, "title").exec((err, books) => {
+    Book.find({})
+      .exec((err, books) => {
         if (err) return next(err);
         res.render("bookInstanceForm", {
             title: "Create BookInstance",
@@ -59,7 +61,7 @@ exports.bookInstance_create_post = [
         .toDate(),
     (req, res, next) => {
         const errors = validationResult(req);
-        const due_back = getDatePlusTimeZoneOffSet(req.body.due_back);
+        const due_back = req.body.due_back && getDatePlusTimeZoneOffSet(req.body.due_back);
         const bookInstance = new BookInstance({
           book: req.body.book,
           imprint: req.body.imprint,
@@ -67,7 +69,8 @@ exports.bookInstance_create_post = [
           status: req.body.status
         });
         if (!errors.isEmpty()) {
-            Book.find({}, "title")
+            Book.find({})
+                .populate('author')
                 .exec((err, books) => {
                     if (err) return res.next(err);
                     res.render("bookInstanceForm", {
@@ -123,6 +126,7 @@ exports.bookInstance_update_get = (req, res) => {
       },
       bookInstance(callback) {
         BookInstance.findById(id)
+          .populate('book')
           .exec(callback);
       },
     },
@@ -142,6 +146,51 @@ exports.bookInstance_update_get = (req, res) => {
     });
 };
 
-exports.bookInstance_update_post = (req, res) => {
-    res.send("Not implemented: BookInstance update post");
-};
+exports.bookInstance_update_post = [
+  body('book', 'Book must be specified.')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body('imprint', 'Imprint must be specified')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body('status', 'Status must be specified.')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body('due_back', 'Invalid Date')
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .toDate(),
+  (req, res, next) => {
+    const id = mongoose.Types.ObjectId(req.params.id);
+    const errors = validationResult(req);
+    const due_back = req.body.due_back && getDatePlusTimeZoneOffSet(req.body.due_back);
+    const bookInstance = new BookInstance({
+      _id: id,
+      book: req.body.book,
+      imprint: req.body.imprint,
+      status: req.body.status,
+      due_back
+    });
+    if (!errors.isEmpty()) {
+      Book.find({})
+        .exec((err, books) => {
+          if (err) return next(err);
+          res.render('bookInstanceForm', {
+            title: `Update Book's Copie`,
+            bookInstance,
+            books,
+            errors: errors.array(),
+          });
+        });
+        return;
+    }
+    BookInstance.findByIdAndUpdate(id, bookInstance, {}, (err, updatedBookInstance) => {
+      if (err) return next(err);
+      res.redirect(updatedBookInstance.url);
+      return;
+    });
+  }
+];

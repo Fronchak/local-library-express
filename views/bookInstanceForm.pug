@@ -15,7 +15,7 @@ block content
                     - return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
                 - })
                 for book in books 
-                    option(value=book._id selected=(selectedBook===book._id.toString() ? "selected" : false)) #{book.title}
+                    option(value=book._id selected=(bookInstance && bookInstance.book._id.toString()===book._id.toString() ? "selected" : false)) #{book.title}
 
         div.form-group 
             h5 
@@ -27,16 +27,16 @@ block content
             h5 
                 label(for="due_back") Date when book will be available: 
             input#due_back.form-control(type="date" name="due_back"
-            value=(undefined===bookInstance ? "" : bookInstance.dateTest))
+            value=(undefined===bookInstance ? "" : bookInstance.dueBackToISODate))
 
         div.form-group 
             h5 
                 label(for="status") Status: 
             select#status.form-control(type="select" name="status" required="true")
-                option(value="Available") Available
-                option(value="Loaned") Loaned 
-                option(value="Maintenance") Maintenance 
-                option(value="Reserved") Reserved
+                option(value="Available" selected=(bookInstance && 'Available'===bookInstance.status) ? 'selected' : false) Available
+                option(value="Loaned" selected=(bookInstance && 'Loaned'===bookInstance.status) ? 'selected' : false) Loaned 
+                option(value="Maintenance" selected=(bookInstance && 'Maintenance'===bookInstance.status) ? 'selected' : false) Maintenance 
+                option(value="Reserved" selected=(bookInstance && 'Reserved'===bookInstance.status) ? 'selected' : false) Reserved
 
         button.btn.btn-primary(type="submit") Submit
 

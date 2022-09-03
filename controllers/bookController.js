@@ -114,7 +114,6 @@ exports.book_create_post = [
         .escape(),
     (req, res, next) => {
         const errors = validationResult(req);
-        console.log(errors.array());
         const book = new Book(req.body);
         if (!errors.isEmpty()) {
             async.parallel({
@@ -138,7 +137,8 @@ exports.book_create_post = [
                     title: "Create Book",
                     authors: results.authors,
                     genres: results.genres,
-                    book
+                    book,
+                    errors: errors.array()
                 });
             });
             return;
@@ -286,7 +286,6 @@ exports.book_update_post = [
       genre: typeof(req.body.genre) === 'undefined' ? [] : req.body.genre,
       _id: req.params.id,
     });
-    console.log(book.genre);
     if(!errors.isEmpty()) {
       async.parallel({
         authors(callback) {

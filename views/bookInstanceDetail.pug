@@ -16,7 +16,7 @@ block content
         else 
             span.text-warning #{copie.status} 
 
-        if copie.status != "Available" 
+        if copie.status != "Available" && copie.due_back
             p #[strong Due back: ] #{copie.dueBackFormatted}
 
     a(href=`${copie.url}/update`) Update copie 
