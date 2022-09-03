@@ -68,7 +68,16 @@ exports.bookInstance_create_post = [
           due_back,
           status: req.body.status
         });
-        if (!errors.isEmpty()) {
+        const errorsArray = errors.array();
+        if (bookInstance.status !== 'Available' && !due_back) {
+          errorsArray.push({
+            msg: 'Due back date must be specified',
+          });
+        }
+        if (bookInstance.status === 'Available' && due_back) {
+          errorsArray.push({ msg: 'Book shoud note have a due back date since its status is available' });
+        }
+        if (errorsArray.length > 0) {
             Book.find({})
                 .populate('author')
                 .exec((err, books) => {
@@ -77,7 +86,7 @@ exports.bookInstance_create_post = [
                         title: "Create BookInstance",
                         books,
                         selectedBook: bookInstance.book._id,
-                        errors: errors.array(),
+                        errors: errorsArray,
                         bookInstance
                     });
                 });
@@ -174,7 +183,14 @@ exports.bookInstance_update_post = [
       status: req.body.status,
       due_back
     });
-    if (!errors.isEmpty()) {
+    const errorsArray = errors.array();
+    if (bookInstance.status !== 'Available' && !due_back) {
+      errorsArray.push({ msg: 'Due back date must be specified' });
+    }
+    if (bookInstance.status === 'Available' && due_back) {
+      errorsArray.push({ msg: 'Book shoud note have a due back date since its status is available' });
+    }
+    if (errorsArray.length > 0) {
       Book.find({})
         .exec((err, books) => {
           if (err) return next(err);
@@ -182,7 +198,7 @@ exports.bookInstance_update_post = [
             title: `Update Book's Copie`,
             bookInstance,
             books,
-            errors: errors.array(),
+            errors: errorsArray,
           });
         });
         return;

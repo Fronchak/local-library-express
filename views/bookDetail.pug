@@ -26,7 +26,7 @@ block content
             else
                 p.text-warning #{copie.status}
             p #[strong Imprint: ] #{copie.imprint}
-            if copie.status != "Available"
+            if copie.status != "Available" && book.due_back
                 p #[strong Due back: ]  #{copie.dueBackFormatted}
             p #[strong Id: ]
                 a(href=copie.url) #{copie._id}

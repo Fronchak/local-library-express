@@ -20,7 +20,7 @@ BookInstanceSchema
 BookInstanceSchema
     .virtual("dueBackFormatted")
     .get(function() {
-        return DateTime.fromJSDate(this.due_back).toLocaleString(DateTime.DATE_MED);
+        return this.due_back && DateTime.fromJSDate(this.due_back).toLocaleString(DateTime.DATE_MED);
     });
 
 BookInstanceSchema
